@@ -1,19 +1,31 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const Hero = () => {
   const [mousePosition, setMousePosition] = useState({ x: 50, y: 25 });
+  const rafRef = useRef<number>();
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      const x = (e.clientX / window.innerWidth) * 100;
-      const y = (e.clientY / window.innerHeight) * 100;
-      setMousePosition({ x, y });
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      
+      rafRef.current = requestAnimationFrame(() => {
+        const x = (e.clientX / window.innerWidth) * 100;
+        const y = (e.clientY / window.innerHeight) * 100;
+        setMousePosition({ x, y });
+      });
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
   }, []);
 
   const scrollToCTA = () => {
@@ -27,11 +39,12 @@ const Hero = () => {
       
       {/* Orange accent glow - follows cursor */}
       <div 
-        className="absolute w-96 h-96 bg-primary/20 rounded-full blur-3xl transition-all duration-500 ease-out pointer-events-none"
+        className="absolute w-96 h-96 bg-primary/20 rounded-full blur-3xl pointer-events-none will-change-transform"
         style={{
           left: `${mousePosition.x}%`,
           top: `${mousePosition.y}%`,
-          transform: 'translate(-50%, -50%)'
+          transform: 'translate(-50%, -50%)',
+          transition: 'left 0.15s ease-out, top 0.15s ease-out'
         }}
       ></div>
       
