@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -8,7 +8,19 @@ const CTASection = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 25, y: 75 });
   const { toast } = useToast();
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const x = (e.clientX / window.innerWidth) * 100;
+      const y = (e.clientY / window.innerHeight) * 100;
+      setMousePosition({ x, y });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,8 +59,15 @@ const CTASection = () => {
 
   return (
     <section id="cta-section" className="py-24 md:py-32 bg-gradient-hero relative overflow-hidden">
-      {/* Orange accent glow */}
-      <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
+      {/* Orange accent glow - follows cursor */}
+      <div 
+        className="absolute w-96 h-96 bg-primary/20 rounded-full blur-3xl transition-all duration-500 ease-out pointer-events-none"
+        style={{
+          left: `${mousePosition.x}%`,
+          top: `${mousePosition.y}%`,
+          transform: 'translate(-50%, -50%)'
+        }}
+      ></div>
       
       <div className="container mx-auto px-6 max-w-2xl text-center relative z-10">
         <h2 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl text-foreground mb-6 animate-fade-in">
